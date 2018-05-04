@@ -24,10 +24,7 @@ namespace SimilarityMeasures
             Console.WriteLine("\nTESTING DistanceSq:\n" + SimilarityMeasures.DistanceSq(point1, point2));
             Console.WriteLine("\nTESTING DWT:\n" + SimilarityMeasures.DynamicTimeWarping(path1, path2));
             Console.WriteLine("\nTESTING EditDist:\n" + SimilarityMeasures.EditDist(path1, path2, 2));
-            List<double> arr = new List<double>(point1.ToArray());
-            arr.AddRange(point2.ToArray());
-            Vector<double> test = Vector<double>.Build.Dense(arr.ToArray());
-            Console.WriteLine(test);
+            Console.WriteLine("\nTESTING LCSS:\n" + SimilarityMeasures.LCSS(path1, path2, 2, 2, 0.5));
         }
     }
 }

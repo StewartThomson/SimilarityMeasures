@@ -200,9 +200,9 @@ namespace SimilarityMeasures{
             return (int)editPaths[length1, length2];
         }
 
-        public static int LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2, bool returnTrans = false){
+        public static Vector<double> LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
             if(!TrajCheck(trajectory1, trajectory2)){
-                return 0;
+                return Vector<double>.Build.Dense(1, -1);
             }
 
             int dimensions = trajectory1.ColumnCount;
@@ -211,12 +211,12 @@ namespace SimilarityMeasures{
 
             if(length1 == 0 || length2 == 0){
                 Console.WriteLine("At least one trajectory contains 0 points");
-                return 0;
+                return Vector<double>.Build.Dense(1, 0);
             }
 
             if(dimensions == 0){
                 Console.WriteLine("Dimension is 0");
-                return Math.Min(length1, length2);
+                return Vector<double>.Build.Dense(1, Math.Min(length1, length2));;
             }
 
             if(pointSpacing < 0){
@@ -226,24 +226,26 @@ namespace SimilarityMeasures{
             List<Vector<double>> translations = new List<Vector<double>>();
 
             for(int i = 0; i < dimensions; i++){
-                translations[i] = TranslationSubset(trajectory1.Column(i), trajectory2.Column(i), pointSpacing, pointDistance);
+                translations.Add(TranslationSubset(trajectory1.Column(i), trajectory2.Column(i), pointSpacing, pointDistance));
             }
 
             int similarity = LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance);
-            Vector<double> optimalTrans = Vector<double>.Build.Dense(dimensions, 0);
+            Vector<double> optimalTrans = Vector<double>.Build.Dense(dimensions + 1, 0);
             List<double> similarityList = new List<double>(similarity);
             similarityList.AddRange(optimalTrans.ToArray());
             Vector<double> similarityVector = Vector<double>.Build.Dense(similarityList.ToArray());
-            
-            double spacing = (double)translations.Count / (4 * (double)pointSpacing / errorMargin);
+
+            double spacing = (double)translations[0].Count / (4.0 * (double)pointSpacing / errorMargin);
 
             if(spacing < 1){
                 spacing = 1;
-            }else if(spacing > (double)translations.Count / 2.0){
-                spacing = (double)translations.Count / 2.0;
+            }else if(spacing > (double)translations[0].Count / 2.0){
+                spacing = (double)translations[0].Count / 2.0;
             }
 
             similarityVector = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, (int)spacing, similarityVector, translations, dimensions, dimensions);
+
+            return similarityVector;
         }
 
         private static Vector<double> SimLoop(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing, int pointDistance, int spacing, Vector<double> similarity, List<Vector<double>> translations, int dimensions, int dimLeft, Vector<double> currentTrans = null){
@@ -255,7 +257,8 @@ namespace SimilarityMeasures{
 
             double prevTrans = -1;
 
-            for(int i = spacing; i <= translations[thisDim].Count; i += spacing){
+            for(int i = spacing - 1; i < translations[thisDim].Count; i += spacing){
+                currentTrans[thisDim] = translations[thisDim][i];
                 if(currentTrans[thisDim] != prevTrans){
                     if(dimLeft > 1){
                         similarity = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, spacing, similarity, translations, dimensions, dimLeft - 1, currentTrans);
@@ -308,14 +311,14 @@ namespace SimilarityMeasures{
             for(int row = 0; row < length1; row++){
                 int minCol = 0;
                 int maxCol = length2 - 1;
-                if(row > pointSpacing + 1){
+                if(row > pointSpacing){
                     minCol = row - pointSpacing;
                 }
-                if(row < length2 - pointSpacing){
+                if(row < length2 - pointSpacing - 1){
                     maxCol = row + pointSpacing;
                 }
                 if(minCol <= maxCol){
-                    for(int col = minCol; col < maxCol; col++){
+                    for(int col = minCol; col <= maxCol; col++){
                         double newValue = 0;
                         double finalValue = 0;
 
@@ -360,16 +363,16 @@ namespace SimilarityMeasures{
                 int minCol = 0;
                 int maxCol = length2 - 1;
 
-                if(row > pointSpacing + 1){
+                if(row > pointSpacing){
                     minCol = row - pointSpacing;
                 }
 
-                if(row < length2 - pointSpacing){
+                if(row < length2 - pointSpacing - 1){
                     maxCol = row + pointSpacing;
                 }
 
                 if(minCol <= maxCol){
-                    for(int col = minCol; col < maxCol; col++){
+                    for(int col = minCol; col <= maxCol; col++){
                         translations.Add(trajectory1[row] - trajectory2[col] + pointDistance);
                         translations.Add(trajectory1[row] - trajectory2[col] - pointDistance);
                     }
