@@ -352,6 +352,74 @@ namespace SimilarityMeasures{
             return similarity;
         }
 
+        public static double LCSSRatio(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return -1;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("At least one trajectory contains 0 points");
+                return 0;
+            }
+
+            double length = Math.Min(length1, length2);
+
+            return LCSS(trajectory1, trajectory2, pointSpacing, pointDistance, errorMargin)[0] / length;
+        }
+
+        public static double LCSSRatioCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return -1;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(translations == null){
+                translations = Vector<double>.Build.Dense(dimensions, 0.0);
+            }
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("At least one trajectory contains 0 points");
+                return 0;
+            }
+
+            double length = Math.Min(length1, length2);
+
+            return (double)LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance, translations) / length;
+        }
+
+        private static double SinglePointCalc(Matrix<double> trajectory1, Matrix<double> trajectory2){
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+            double leashSq = 1.0;
+
+            if(length1 == 1){
+                for(int point2 = 0; point2 < length2; point2++){
+                    double newLeashSq = DistanceSq(trajectory1.Row(0), trajectory2.Row(point2));
+                    leashSq = Math.Max(leashSq, newLeashSq);
+                }
+            }else if(length2 == 1){
+                for(int point1 = 0; point1 < length1; point1++){
+                    double newLeashSq = DistanceSq(trajectory1.Row(point1), trajectory2.Row(0));
+                    leashSq = Math.Max(leashSq, newLeashSq);
+                }
+            }
+
+            if(leashSq >= 0){
+                return Math.Sqrt(leashSq);
+            }else{
+                Console.WriteLine("Error in single point trajectory calculation");
+                return -1;
+            }
+        }
+
         private static Vector<double> TranslationSubset(Vector<double> trajectory1, Vector<double> trajectory2, int pointSpacing, int pointDistance){
             int length1 = trajectory1.Count;
             int length2 = trajectory2.Count;
@@ -381,6 +449,223 @@ namespace SimilarityMeasures{
             translations.Sort();
 
             return Vector<double>.Build.Dense(translations.ToArray());
+        }
+
+        public static Matrix<double> StartEndTranslate(Matrix<double> trajectory1, Matrix<double> trajectory2){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return null;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("A trajectory has no points");
+                return trajectory2;
+            }
+
+            if(dimensions == 0){
+                Console.WriteLine("Dimension is 0");
+                return trajectory2;
+            }
+
+            Matrix<double> newTraj = Matrix<double>.Build.DenseOfMatrix(trajectory2);
+
+            for(int i = 0; i < dimensions; i++){
+                double diff1 = trajectory1[length1 - 1, i] - trajectory1[0, i];
+                double diff2 = trajectory2[length2 - 1, i] - trajectory2[0, i];
+
+                if(diff2 == 0){
+                    Console.WriteLine("Equivalent start/end points in 1 dimension");
+                }else{
+                    for(int point = 0; point < length2; point++){
+                        double pointDiff = trajectory2[point, i] - trajectory2[0, i];
+                        newTraj[point, i] = (pointDiff / diff2) * diff1 + trajectory1[0, i];
+                    }
+                }
+            }
+
+            return newTraj;
+        }
+
+        private static bool FrechetCheck(Matrix<double> trajectory1, Matrix<double> trajectory2, double leash, Vector<double> dist1, Vector<double> dist2, Matrix<double> distSq12){
+            double leashSq = leash * leash;
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            double[, ,] left = new double[length1, length2 - 1, 2];
+            double[, ,] bottom = new double[length1 - 1, length2, 2];
+            double[, ,] newLeft = new double[length1, length2 - 1, 2];
+            double[, ,] newBottom = new double[length1 - 1, length2, 2];
+
+            if(leashSq < distSq12[0, 0] | leashSq < distSq12[length1 - 1, length2 - 2]){
+                return false;
+            }
+
+            //Calculating the freespace of the first trajectory wrt the second
+            for(int point1 = 0; point1 < length1 - 1; point1++){
+                Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
+                if(dist1[point1] != 0){
+                    unitV1 = (trajectory1.Row(point1 + 1) - trajectory1.Row(point1) / dist1[point1]);
+                }
+
+                for(int point2 = 0; point2 < length2; point2++){
+                    //Create vector from point 1 to point 2
+                    Vector<double> vect12 = trajectory2.Row(point2) - trajectory1.Row(point1);
+                    //Dot product finds how far from point1 the closest point on the line is
+                    double pointDistance = unitV1.DotProduct(vect12);
+                    //Square for easy calculation
+                    double pointDistanceSq = pointDistance * pointDistance;
+                    //Square of the distance between the line segment and the point
+                    double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                    //If some part of the current line can be used by the leash
+                    if(shortDistance <= leashSq){
+                        //Calculating the envelope alone the line
+                        double envSize = Math.Sqrt(leashSq - shortDistance);
+                        double envLow = pointDistance - envSize;
+                        double envHigh = pointDistance + envSize;
+
+                        //If whole line is in envelope
+                        if(envHigh >= dist1[point1] && envLow <= 0){
+                            bottom[point1, point2, 0] = 0;
+                            bottom[point1, point2, 1] = 1;
+                        }else if(envHigh >= 0 && envLow <= 0){
+                            //If the start of the line is within the envelope
+                            bottom[point1, point2, 0] = 0;
+                            bottom[point1, point2, 1] = envHigh / dist1[point1];
+                        }else if(envHigh >= dist1[point1] && envLow <= dist1[point1]){
+                            //If the end of the line is within the envelope
+                            bottom[point1, point2, 0] = envLow / dist1[point1];
+                            bottom[point1, point2, 1] = 1;
+                        }else if(envHigh >= 0 && envLow <= dist1[point1]){
+                            //If the envelope is completely within the line
+                            bottom[point1, point2, 0] = envLow / dist1[point1];
+                            bottom[point1, point2, 1] = envHigh / dist1[point1];
+                        }
+                    }
+                }
+            }
+
+            //Calculating the freespace of the second trajectory wrt the first
+            for(int point2 = 0; point2 < length2 - 1; point2++){
+                Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
+                if(dist1[point2] != 0){
+                    unitV1 = (trajectory2.Row(point2 + 1) - trajectory2.Row(point2) / dist2[point2]);
+                }
+
+                for(int point1 = 0; point1 < length1; point1++){
+                    //Create vector from point 1 to point 2
+                    Vector<double> vect12 = trajectory1.Row(point1) - trajectory2.Row(point2);
+                    //Dot product finds how far from point1 the closest point on the line is
+                    double pointDistance = unitV1.DotProduct(vect12);
+                    //Square for easy calculation
+                    double pointDistanceSq = pointDistance * pointDistance;
+                    //Square of the distance between the line segment and the point
+                    double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                    //If some part of the current line can be used by the leash
+                    if(shortDistance <= leashSq){
+                        //Calculating the envelope alone the line
+                        double envSize = Math.Sqrt(leashSq - shortDistance);
+                        double envLow = pointDistance - envSize;
+                        double envHigh = pointDistance + envSize;
+
+                        //If whole line is in envelope
+                        if(envHigh >= dist2[point2] && envLow <= 0){
+                            left[point1, point2, 0] = 0;
+                            left[point1, point2, 1] = 1;
+                        }else if(envHigh >= 0 && envLow <= 0){
+                            //If the start of the line is within the envelope
+                            left[point1, point2, 0] = 0;
+                            left[point1, point2, 1] = envHigh / dist2[point2];
+                        }else if(envHigh >= dist2[point2] && envLow <= dist2[point2]){
+                            //If the end of the line is within the envelope
+                            left[point1, point2, 0] = envLow / dist2[point2];
+                            left[point1, point2, 1] = 1;
+                        }else if(envHigh >= 0 && envLow <= dist2[point2]){
+                            //If the envelope is completely within the line
+                            left[point1, point2, 0] = envLow / dist2[point2];
+                            left[point1, point2, 1] = envHigh / dist2[point2];
+                        }
+                    }
+                }
+            }
+            //Set up new arrays to find the monotone freespace
+            newLeft[0, 0, 0] = left[0, 0, 0];
+            newLeft[0, 0, 1] = left[0, 0, 1];
+            newBottom[0, 0, 0] = bottom[0, 0, 0];
+            newBottom[0, 0, 1] = bottom[0, 0, 1];
+
+            //Setting the first line of the new left array
+            if(length2 > 2){
+                for(int point2 = 1; point2 < length2 - 1; point2++){
+                    if(newLeft[0, point2 - 1, 1] == 1){
+                        newLeft[0, point2, 0] = left[0, point2, 0];
+                        newLeft[0, point2, 1] = left[0, point2, 1];
+                    }
+                }
+            }
+
+            //Setting the first line of the new bottom array
+            if(length1 > 2){
+                for(int point1 = 1; point1 < length1 - 1; point1++){
+                    if(newBottom[point1 - 1, 0, 1] == 1){
+                        newBottom[point1, 0, 0] = bottom[point1, 0, 0];
+                        newBottom[point1, 0, 1] = bottom[point1, 0, 1];
+                    }
+                }
+            }
+
+            //Calculating the monotone freespace
+            for(int point1 = 0; point1 < length1; point1++){
+                for(int point2 = 0; point2 < length2; point2++){
+                    if(point1 != length1 - 1 && point2 != 0){
+                        //If the area is allowable from the freespace
+                        if(bottom[point1, point2, 0] > -0.1){
+                            //If the new area can be entered from the left.
+                            if(newLeft[point1, point2 - 1, 0] > -0.1){
+                                //Setting up the montone freespace for these points.
+                                newBottom[point1, point2, 0] = bottom[point1, point2, 0];
+                                newBottom[point1, point2, 1] = bottom[point1, point2, 1];
+                            }else if(newBottom[point1, point2 - 1, 0] > -0.1){
+                                if(newBottom[point1, point2 - 1, 0] <= bottom[point1, point2, 0]){
+                                    newBottom[point1, point2, 0] = bottom[point1, point2, 0];
+                                    newBottom[point1, point2, 1] = bottom[point1, point2, 1];
+                                }else if(newBottom[point1, point2 - 1, 0] <= bottom[point1, point2, 1]){
+                                    newBottom[point1, point2, 0] = bottom[point1, point2 - 1, 0];
+                                    newBottom[point1, point2, 1] = bottom[point1, point2, 1];
+                                }
+                            }
+                        }
+                    }
+                    if(point2 != length2 - 1 && point1 != 0){
+                        //If the area is allowable from the freespace
+                        if(left[point1, point2, 0] > -0.1){
+                            //If the new area can be entered from the bottom.
+                            if(newBottom[point1 - 1, point2, 0] > -0.1){
+                                //Setting up the montone freespace for these points.
+                                newLeft[point1, point2, 0] = left[point1, point2, 0];
+                                newLeft[point1, point2, 1] = left[point1, point2, 1];
+                            }else if(newLeft[point1 - 1, point2, 0] > -0.1){
+                                if(newLeft[point1 - 1, point2, 0] <= left[point1, point2, 0]){
+                                    newLeft[point1, point2, 0] = left[point1, point2, 0];
+                                    newLeft[point1, point2, 1] = left[point1, point2, 1];
+                                }else if(newLeft[point1 - 1, point2, 0] <= left[point1, point2, 1]){
+                                    newLeft[point1, point2, 0] = left[point1 - 1, point2 - 1, 0];
+                                    newLeft[point1, point2, 1] = left[point1, point2, 1];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //If the monotone freespace reaches the final point then the leash is successful
+            if(newLeft[length1 - 1, length2 - 2, 1] == 1 || newBottom[length1 - 2, length2 - 1, 1] == 1){
+                return true;
+            }else{
+                return false;
+            }
         }
     }    
 }

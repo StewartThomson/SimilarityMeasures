@@ -25,6 +25,7 @@ namespace SimilarityMeasures
             Console.WriteLine("\nTESTING DWT:\n" + SimilarityMeasures.DynamicTimeWarping(path1, path2));
             Console.WriteLine("\nTESTING EditDist:\n" + SimilarityMeasures.EditDist(path1, path2, 2));
             Console.WriteLine("\nTESTING LCSS:\n" + SimilarityMeasures.LCSS(path1, path2, 2, 2, 0.5));
+            Console.WriteLine("\nTESTING StartEndTranslate:\n" + SimilarityMeasures.StartEndTranslate(path1, path2));
         }
     }
 }
