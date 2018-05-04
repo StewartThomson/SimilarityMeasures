@@ -1,6 +1,7 @@
 using System;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Collections.Generic;
 
 namespace SimilarityMeasures
 {
@@ -22,7 +23,11 @@ namespace SimilarityMeasures
             Console.WriteLine("\nTESTING DistanceCheck with distance 3:\n" + SimilarityMeasures.DistanceCheck(point1, point2, 3));
             Console.WriteLine("\nTESTING DistanceSq:\n" + SimilarityMeasures.DistanceSq(point1, point2));
             Console.WriteLine("\nTESTING DWT:\n" + SimilarityMeasures.DynamicTimeWarping(path1, path2));
-            Console.WriteLine("\nTESTING EditDist:\n" + SimilarityMeasures.EditDist(path1, path2));
+            Console.WriteLine("\nTESTING EditDist:\n" + SimilarityMeasures.EditDist(path1, path2, 2));
+            List<double> arr = new List<double>(point1.ToArray());
+            arr.AddRange(point2.ToArray());
+            Vector<double> test = Vector<double>.Build.Dense(arr.ToArray());
+            Console.WriteLine(test);
         }
     }
 }

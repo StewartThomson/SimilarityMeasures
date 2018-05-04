@@ -2,6 +2,7 @@ using System;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.Statistics;
+using System.Collections.Generic;
 
 namespace SimilarityMeasures{
     public static class SimilarityMeasures{
@@ -184,10 +185,10 @@ namespace SimilarityMeasures{
 
             for(int point1 = 1; point1 < length1 + 1; point1++){
                 for(int point2 = 1; point2 < length2 + 1; point2++){
-                    int diagonal = 2;
+                    int diagonal = 1;
 
                     if(DistanceCheck(trajectory1.Row(point1 - 1), trajectory2.Row(point2 - 1), pointDistance)){
-                        diagonal = 1;
+                        diagonal = 0;
                     }
 
                     double pathValue = MinOf3(editPaths[point1 - 1, point2] + 1, editPaths[point1, point2 - 1] + 1, editPaths[point1 - 1, point2 - 1] + diagonal);
@@ -195,8 +196,188 @@ namespace SimilarityMeasures{
                     editPaths[point1, point2] = pathValue;
                 }
             }
-            Console.WriteLine(editPaths);
+            
             return (int)editPaths[length1, length2];
+        }
+
+        public static int LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2, bool returnTrans = false){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return 0;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("At least one trajectory contains 0 points");
+                return 0;
+            }
+
+            if(dimensions == 0){
+                Console.WriteLine("Dimension is 0");
+                return Math.Min(length1, length2);
+            }
+
+            if(pointSpacing < 0){
+                pointSpacing = Math.Max(length1, length2);
+            }
+
+            List<Vector<double>> translations = new List<Vector<double>>();
+
+            for(int i = 0; i < dimensions; i++){
+                translations[i] = TranslationSubset(trajectory1.Column(i), trajectory2.Column(i), pointSpacing, pointDistance);
+            }
+
+            int similarity = LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance);
+            Vector<double> optimalTrans = Vector<double>.Build.Dense(dimensions, 0);
+            List<double> similarityList = new List<double>(similarity);
+            similarityList.AddRange(optimalTrans.ToArray());
+            Vector<double> similarityVector = Vector<double>.Build.Dense(similarityList.ToArray());
+            
+            double spacing = (double)translations.Count / (4 * (double)pointSpacing / errorMargin);
+
+            if(spacing < 1){
+                spacing = 1;
+            }else if(spacing > (double)translations.Count / 2.0){
+                spacing = (double)translations.Count / 2.0;
+            }
+
+            similarityVector = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, (int)spacing, similarityVector, translations, dimensions, dimensions);
+        }
+
+        private static Vector<double> SimLoop(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing, int pointDistance, int spacing, Vector<double> similarity, List<Vector<double>> translations, int dimensions, int dimLeft, Vector<double> currentTrans = null){
+            if(currentTrans == null){
+                currentTrans = Vector<double>.Build.Dense(dimensions, 0);
+            }
+
+            int thisDim = dimensions - dimLeft;
+
+            double prevTrans = -1;
+
+            for(int i = spacing; i <= translations[thisDim].Count; i += spacing){
+                if(currentTrans[thisDim] != prevTrans){
+                    if(dimLeft > 1){
+                        similarity = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, spacing, similarity, translations, dimensions, dimLeft - 1, currentTrans);
+                    }else{
+                        int newValue = LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance, currentTrans);
+
+                        if(newValue > similarity[0]){
+                            similarity[0] = newValue;
+                            for(int d = 0; d < dimensions; d++){
+                                similarity[d + 1] = currentTrans[d];
+                            }
+                        }
+                    }
+                    prevTrans = currentTrans[thisDim];
+                }
+            }
+
+            return similarity;
+        }
+        public static int LCSSCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return -1;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(translations == null){
+                translations = Vector<double>.Build.Dense(dimensions, 0.0);
+            }
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("At least one trajectory contains 0 points");
+                return 0;
+            }
+
+            if(dimensions == 0){
+                Console.WriteLine("Dimension is 0");
+                return Math.Min(length1, length2);
+            }
+
+            if(pointSpacing < 0){
+                pointSpacing = Math.Max(length1, length2);
+            }
+
+            Matrix<double> distMatrix = Matrix<double>.Build.Dense(length1, length2, 0);
+            int similarity = 0;
+
+            for(int row = 0; row < length1; row++){
+                int minCol = 0;
+                int maxCol = length2 - 1;
+                if(row > pointSpacing + 1){
+                    minCol = row - pointSpacing;
+                }
+                if(row < length2 - pointSpacing){
+                    maxCol = row + pointSpacing;
+                }
+                if(minCol <= maxCol){
+                    for(int col = minCol; col < maxCol; col++){
+                        double newValue = 0;
+                        double finalValue = 0;
+
+                        if(row != 0 && col != 0){
+                            finalValue = newValue = distMatrix[row - 1, col - 1];
+                        }
+                        if(row != 0){
+                            double below = distMatrix[row - 1, col];
+                            finalValue = Math.Max(below, finalValue);
+                        }
+                        if(col != 0){
+                            double before = distMatrix[row, col - 1];
+                            finalValue = Math.Max(before, finalValue);
+                        }
+                        if(finalValue < newValue + 1){
+                            bool checkPoint = DistanceCheck(trajectory1.Row(row), trajectory2.Row(col) + translations, pointDistance);
+
+                            if(checkPoint){
+                                finalValue = ++newValue;
+                            }
+                        }
+
+                        distMatrix[row, col] = finalValue;
+
+                        if(finalValue > similarity){
+                            similarity = (int)finalValue;
+                        }
+                    }
+                }          
+            }
+            return similarity;
+        }
+
+        private static Vector<double> TranslationSubset(Vector<double> trajectory1, Vector<double> trajectory2, int pointSpacing, int pointDistance){
+            int length1 = trajectory1.Count;
+            int length2 = trajectory2.Count;
+
+            //To turn into array, then into vector later
+            List<double> translations = new List<double>();
+
+            for(int row = 0; row < length1; row++){
+                int minCol = 0;
+                int maxCol = length2 - 1;
+
+                if(row > pointSpacing + 1){
+                    minCol = row - pointSpacing;
+                }
+
+                if(row < length2 - pointSpacing){
+                    maxCol = row + pointSpacing;
+                }
+
+                if(minCol <= maxCol){
+                    for(int col = minCol; col < maxCol; col++){
+                        translations.Add(trajectory1[row] - trajectory2[col] + pointDistance);
+                        translations.Add(trajectory1[row] - trajectory2[col] - pointDistance);
+                    }
+                }
+            }
+            translations.Sort();
+
+            return Vector<double>.Build.Dense(translations.ToArray());
         }
     }    
 }
