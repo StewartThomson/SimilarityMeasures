@@ -489,6 +489,266 @@ namespace SimilarityMeasures{
             return newTraj;
         }
 
+        public static double Frechet(Matrix<double> trajectory1, Matrix<double> trajectory2, double testLeash = -1.0){
+            if(!TrajCheck(trajectory1, trajectory2)){
+                return -1;
+            }
+
+            int dimensions = trajectory1.ColumnCount;
+            int length1 = trajectory1.RowCount;
+            int length2 = trajectory2.RowCount;
+
+            if(length1 == 0 || length2 == 0){
+                Console.WriteLine("At least one length is 0");
+                return 0;
+            }
+
+            if(dimensions == 0){
+                Console.WriteLine("The dimension is 0");
+                return 0;
+            }
+
+            if(length1 == 1 || length2 == 1){
+                double leash = SinglePointCalc(trajectory1, trajectory2);
+                if(testLeash >= 0){
+                    return Math.Min(testLeash, leash);
+                }else{
+                    return leash;
+                }
+            }
+
+            Vector<double> dist1 = Vector<double>.Build.Dense(length1 - 1, 0);
+            Vector<double> dist2 = Vector<double>.Build.Dense(length2 - 1, 0);
+
+            for(int point = 0; point < length1 - 1; point++){
+                double dist = DistanceSq(trajectory1.Row(point + 1), trajectory1.Row(point));
+                dist1[point] = Math.Sqrt(dist);
+            }
+
+            for(int point = 0; point < length2 - 1; point++){
+                double dist = DistanceSq(trajectory2.Row(point + 1), trajectory2.Row(point));
+                dist2[point] = Math.Sqrt(dist);
+            }
+
+            double minLeashSq = DistanceSq(trajectory1.Row(0), trajectory2.Row(0));
+            double endDistSq  = DistanceSq(trajectory1.Row(length1 - 1), trajectory2.Row(length2 - 1));
+            minLeashSq = Math.Min(minLeashSq, endDistSq);
+
+            List<double> leashList = new List<double>();
+            leashList.Add(Math.Sqrt(minLeashSq));
+
+            Matrix<double> distSq12 = Matrix.Build.Dense(length1, length2, 0);
+
+            for(int point1 = 0; point1 < length1; point1++){
+                for(int point2 = 0; point2 < length2; point2++){
+                    double dist = DistanceSq(trajectory1.Row(point1), trajectory2.Row(point2));
+                    distSq12[point1, point2] = dist;
+                    //Adding in these leash possibilities because they are critical points
+                    if(dist > minLeashSq){
+                        leashList.Add(Math.Sqrt(dist));
+                    }
+                }
+            }
+
+            //If a testLeash is given
+            if(testLeash >= 0){
+                if(FrechetCheck(trajectory1, trajectory2, testLeash, dist1, dist2, distSq12)){
+                    return testLeash;
+                }else{
+                    return -1;
+                }
+            }
+
+            //Adding critical point leash possibilities to leash list
+            for(int point1 = 0; point1 < length1 - 1; point1++){
+                //Creating a unit vector in the direction of the next point from point1
+                Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
+                if(dist1[point1] != 0){
+                    unitV1 = (trajectory1.Row(point1 + 1) - trajectory1.Row(point1)) / dist1[point1];
+                }
+
+                for(int point2 = 0; point2 < length2; point2++){
+                    //Creating a vector from point1 to point2
+                    Vector<double> vect12 = trajectory2.Row(point2) - trajectory1.Row(point1);
+                    //Dot product finds how far from point1 the closest point on the line is
+                    double pointDistance = unitV1.DotProduct(vect12);
+                    //Square for easy calculation
+                    double pointDistanceSq = pointDistance * pointDistance;
+                    //The square of the distance between the line segment and the point
+                    double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                    double leashSq = 0;
+
+                    if(pointDistance < 0){
+                    }else if(pointDistance > dist1[point1]){
+                        leashSq = distSq12[point1 + 1, point2];
+                    }else{
+                        leashSq = shortDistance;
+                    }
+
+                    //Adding the leash possibility to the list
+                    if(leashSq > minLeashSq){
+                        leashList.Add(Math.Sqrt(leashSq));
+                    }
+                }
+            }
+
+            for(int point2 = 0; point2 < length2 - 1; point2++){
+                //Creating a unit vector in the direction of the next point from point1
+                Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
+                if(dist2[point2] != 0){
+                    unitV1 = (trajectory2.Row(point2 + 1) - trajectory2.Row(point2)) / dist2[point2];
+                }
+
+                for(int point1 = 0; point1 < length1; point1++){
+                    //Creating a vector from point1 to point2
+                    Vector<double> vect12 = trajectory1.Row(point1) - trajectory2.Row(point2);
+                    //Dot product finds how far from point1 the closest point on the line is
+                    double pointDistance = unitV1.DotProduct(vect12);
+                    //Square for easy calculation
+                    double pointDistanceSq = pointDistance * pointDistance;
+                    //The square of the distance between the line segment and the point
+                    double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                    double leashSq = 0;
+
+                    if(pointDistance < 0){
+                    }else if(pointDistance > dist2[point2]){
+                        leashSq = distSq12[point1, point2 + 1];
+                    }else{
+                        leashSq = shortDistance;
+                    }
+
+                    //Adding the leash possibility to the list
+                    if(leashSq > minLeashSq){
+                        leashList.Add(Math.Sqrt(leashSq));
+                    }
+                }
+            }
+
+            //Calculating the critical points where new passages may open
+            if(length1 > 3){
+                for(int point2 = 0; point2 < length2 - 1; point2++){
+                    //Creating a unit vector in the direction of the next point from point2
+                    Vector<double> unitV2 = Vector<double>.Build.Dense(dimensions, 0);
+                    if(dist2[point2] != 0){
+                        unitV2 = (trajectory2.Row(point2 + 1) - trajectory2.Row(point2)) / dist2[point2];
+                    }
+
+                    for(int point1 = 1; point1 < length1 - 2; point1++){
+                        //Creating a vector from point2 to point 1
+                        Vector<double> vect21 = trajectory1.Row(point1) - trajectory2.Row(point2);
+                        //Dot product finds how far from point2 the closest point on the line is
+                        double pointDistance = unitV2.DotProduct(vect21);
+                        if(pointDistance > 0){
+                            //Square for easy calculation
+                            double pointDistanceSq = pointDistance * pointDistance;
+                            //The square of the distance between the line segment and the point
+                            double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                            //The second point where the passage opens up
+                            for(int newPoint = point1 + 1; newPoint < length1 - 1; newPoint++){
+                                //Creating new vector from point2 to newPoint
+                                Vector<double> vect2new = trajectory1.Row(newPoint) - trajectory2.Row(point2);
+                                //Dot product finds how far from point2 the closest point on the line is
+                                double newPointDistance = unitV2.DotProduct(vect2new);
+                                if(newPointDistance > pointDistance){
+                                    double newPointDistSq = newPointDistance * newPointDistance;
+                                    double newShortDistance = distSq12[newPoint, point2] - newPointDistSq;
+                                    //The distance between the two closest points on the line
+                                    double pointDiff = pointDistance - newPointDistance;
+                                    //Finding the point where the passage opens
+                                    double equivPoint = (pointDiff * pointDiff + shortDistance - newShortDistance) / (pointDiff * 2.0);
+
+                                    if(equivPoint > 0 && equivPoint < dist2[point2]){
+                                        double leashSq = newShortDistance + (equivPoint * equivPoint);
+                                        if(leashSq > minLeashSq){
+                                            leashList.Add(Math.Sqrt(leashSq));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(length2 > 3){
+                for(int point1 = 0; point1 < length1 - 1; point1++){
+                    //Creating a unit vector in the direction of the next point from point2
+                    Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
+                    if(dist1[point1] != 0){
+                        unitV1 = (trajectory2.Row(point1 + 1) - trajectory2.Row(point1)) / dist2[point1];
+                    }
+
+                    for(int point2 = 1; point2 < length2 - 2; point2++){
+                        //Creating a vector from point1 to point2
+                        Vector<double> vect12 = trajectory2.Row(point2) - trajectory1.Row(point1);
+                        //Dot product finds how far from point2 the closest point on the line is
+                        double pointDistance = unitV1.DotProduct(vect12);
+                        if(pointDistance > 0){
+                            //Square for easy calculation
+                            double pointDistanceSq = pointDistance * pointDistance;
+                            //The square of the distance between the line segment and the point
+                            double shortDistance = distSq12[point1, point2] - pointDistanceSq;
+                            //The second point where the passage opens up
+                            for(int newPoint = point2 + 1; newPoint < length2 - 1; newPoint++){
+                                //Creating new vector from point2 to newPoint
+                                Vector<double> vect1new = trajectory2.Row(newPoint) - trajectory1.Row(point1);
+                                //Dot product finds how far from point2 the closest point on the line is
+                                double newPointDistance = unitV1.DotProduct(vect1new);
+                                if(newPointDistance > pointDistance){
+                                    double newPointDistSq = newPointDistance * newPointDistance;
+                                    double newShortDistance = distSq12[point1, newPoint] - newPointDistSq;
+                                    //The distance between the two closest points on the line
+                                    double pointDiff = pointDistance - newPointDistance;
+                                    //Finding the point where the passage opens
+                                    double equivPoint = (pointDiff * pointDiff + shortDistance - newShortDistance) / (pointDiff * 2.0);
+
+                                    if(equivPoint > 0 && equivPoint < dist1[point1]){
+                                        double leashSq = newShortDistance + (equivPoint * equivPoint);
+                                        if(leashSq > minLeashSq){
+                                            leashList.Add(Math.Sqrt(leashSq));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Sort leash and remove duplicates
+            leashList.Sort();
+            List<double> uniqueLeash = new List<double>();
+            uniqueLeash.Add(leashList[0]);
+            double lastLeash = uniqueLeash[0];
+            foreach(double item in leashList){
+                if(lastLeash != item){
+                    lastLeash = item;
+                    uniqueLeash.Add(item);
+                }
+            }
+            
+            //Set up binary search for the list
+            int startSearch = 0;
+            int endSearch = uniqueLeash.Count - 1;
+            //Making sure the largest leash is large enough
+            if(FrechetCheck(trajectory1, trajectory2, uniqueLeash[endSearch], dist1, dist2, distSq12)){
+                //Execute binary search
+                while(startSearch < endSearch){
+                    int current = (endSearch - startSearch / 2) * startSearch;
+                    if(FrechetCheck(trajectory1, trajectory2, uniqueLeash[current], dist1, dist2, distSq12)){
+                        endSearch = current;
+                    }else{
+                        startSearch = current + 1;
+                    }
+                }
+                //Return the shortest leash for the trajectories
+                return uniqueLeash[endSearch];
+            }else{
+                Console.WriteLine("Unable to find frechet distance");
+                return -1;
+            }
+        }
+
         private static bool FrechetCheck(Matrix<double> trajectory1, Matrix<double> trajectory2, double leash, Vector<double> dist1, Vector<double> dist2, Matrix<double> distSq12){
             double leashSq = leash * leash;
             int dimensions = trajectory1.ColumnCount;
