@@ -10,6 +10,16 @@ namespace SimilarityMeasures{
         private static double MinOf3(double a, double b, double c){
             return Math.Min(a, Math.Min(b, c));
         }
+        /*Checks that the trajectories have the same dimension
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+            of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+            of points and n is the dimension of the points.
+            The two trajectories do not need to have the same number of points
+        Returns:
+            True if the dimensions are the same, false otherwise
+         */
         private static bool TrajCheck(Matrix<double> trajectory1, Matrix<double> trajectory2){
             if(trajectory1.ColumnCount != trajectory2.ColumnCount){
                 Console.WriteLine("Trajectory dimensions do not match");
@@ -19,6 +29,16 @@ namespace SimilarityMeasures{
             return true;
         }
 
+        /*Calculates the translation vector for trajectory 2 using the average of the two trajectories
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+            of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+            of points and n is the dimension of the points.
+            The two trajectories do not need to have the same number of points
+        Returns:
+            A vector of length n is returned containing the translation in each dimension. If there is a problem an empty vector is returned.
+         */
         public static Vector<double> AveTranslate(Matrix<double> trajectory1, Matrix<double> trajectory2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return null;
@@ -52,6 +72,14 @@ namespace SimilarityMeasures{
             return translation;
         }
 
+        /*Checks whether two points lie within some distance in every dimension
+        Args:
+            point1: An n dimensional vector representing point1
+            point2: An n dimensional vector representing point2
+            dist: Number representing the maximum distance in each dimension allowed for points to be considered equivalent
+        Returns:
+            True if the points are within the distance, false if not
+         */
         public static bool DistanceCheck(Vector<double> point1, Vector<double> point2, double distance){
             int dimensions = point1.Count;
             bool check = true;
@@ -67,6 +95,13 @@ namespace SimilarityMeasures{
             return check;
         }
 
+        /*Calculates the square of the distance between two points with the same dimensions
+        Args:
+            point1: An n dimensional vector representing point1
+            point2: An n dimensional vector representing point2
+        Returns:
+            A double representing the square of the distance between the two points
+         */
         public static double DistanceSq(Vector<double> point1, Vector<double> point2){
             int dimensions = point1.Count;
 
@@ -79,6 +114,18 @@ namespace SimilarityMeasures{
             return dist;
         }
 
+        /*Calculates the Dynamic Time Warping value between two trajectories
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+        Returns:
+            A number representing the smallest warp path is returned. If a problem occurs, -1 is returned
+        */
         public static double DynamicTimeWarping(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -132,25 +179,43 @@ namespace SimilarityMeasures{
                         if(Math.Abs(pointDifference) <= pointSpacing){
                             dist = DistanceSq(trajectory1.Row(point1), trajectory2.Row(point2));
                             double path = -1;
+                            //When no point spacing is allowed
                             if(pointSpacing == 0){
                                 path = warpPaths[point1 - 1, point2 - 1];
                             }else if(pointDifference == pointSpacing){
+                                //The furthest distance forward point calculation
                                 path = Math.Min(warpPaths[point1 - 1, point2 -1 ], warpPaths[point1 - 1, point2]);
                             }else if(-pointDifference == pointSpacing){
+                                //The furthest distance backwards point calculation
                                 path = Math.Min(warpPaths[point1 - 1, point2 - 1], warpPaths[point1, point2 - 1]);
                             }else{
+                                //All other points
                                 path = Math.Min(warpPaths[point1 - 1, point2 - 1], Math.Min(warpPaths[point1, point2 - 1], warpPaths[point1 -1, point2]));
                             }
-
+                            //Storing the new best path for these points
                             warpPaths[point1, point2] = path + Math.Sqrt(dist);
                         }
                     }
                 }
             }
-
+            //Returning the best warp path distance
             return warpPaths[length1 - 1, length2 - 1];
         }
 
+        /*Calculates the edit distance between two trajectories.
+        This takes two trajectories and the maximum distance between points
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+        Returns:
+            An integer representing the minimum number of edits required to be returned. If a problem occurs
+            -1 is returned.
+         */
         public static int EditDist(Matrix<double> trajectory1, Matrix<double> trajectory2, double pointDistance = 20){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -186,20 +251,37 @@ namespace SimilarityMeasures{
             for(int point1 = 1; point1 < length1 + 1; point1++){
                 for(int point2 = 1; point2 < length2 + 1; point2++){
                     int diagonal = 1;
-
+                    //Setting the diagonal increment depending on whether the current points are within range
                     if(DistanceCheck(trajectory1.Row(point1 - 1), trajectory2.Row(point2 - 1), pointDistance)){
                         diagonal = 0;
                     }
-
+                    //Setting the path to the current two points to the minimum value
                     double pathValue = MinOf3(editPaths[point1 - 1, point2] + 1, editPaths[point1, point2 - 1] + 1, editPaths[point1 - 1, point2 - 1] + diagonal);
 
                     editPaths[point1, point2] = pathValue;
                 }
             }
-            
+            //Returning the final minimum path as the edit distance
             return (int)editPaths[length1, length2];
         }
 
+        /*Calculates the longest common subsequence for two given trajectories
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+            errorMargin: A number used to scale the accuracy and speed of the calculation
+        Returns:
+            A vector containing the LCSS value (in its first index) and the translations are retuned.
+            The first value of the vector is the LCSS values. If a problem occurs then a vector containing
+            -1 is returned
+         */
         public static Vector<double> LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return Vector<double>.Build.Dense(1, -1);
@@ -224,17 +306,19 @@ namespace SimilarityMeasures{
             }
 
             List<Vector<double>> translations = new List<Vector<double>>();
-
+            //Calculating the subsets of translations
             for(int i = 0; i < dimensions; i++){
                 translations.Add(TranslationSubset(trajectory1.Column(i), trajectory2.Column(i), pointSpacing, pointDistance));
             }
 
+            //Storing the most optimal translations and similarity found so far
             int similarity = LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance);
             Vector<double> optimalTrans = Vector<double>.Build.Dense(dimensions + 1, 0);
             List<double> similarityList = new List<double>(similarity);
             similarityList.AddRange(optimalTrans.ToArray());
             Vector<double> similarityVector = Vector<double>.Build.Dense(similarityList.ToArray());
-
+            //Calculating how many translation possibilities are skipped for every one that is checked
+            //using the error margin given
             double spacing = (double)translations[0].Count / (4.0 * (double)pointSpacing / errorMargin);
 
             if(spacing < 1){
@@ -242,12 +326,31 @@ namespace SimilarityMeasures{
             }else if(spacing > (double)translations[0].Count / 2.0){
                 spacing = (double)translations[0].Count / 2.0;
             }
-
+            //Running the LCSS algorithm on each of the translations to be checked
             similarityVector = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, (int)spacing, similarityVector, translations, dimensions, dimensions);
 
             return similarityVector;
         }
 
+        /*Loops over and tests the trajectories using different translations in each dimension
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+            spacing: The integer spacing between each translation that will be tested
+            similarity: A vector containing the current best similarity in each dimension
+            dimensions: The number of dimensions used in the calculation
+            dimLeft: The dimensions which have not been looped over yet
+            currentTrans: A vector containing the current translation being tested
+        Returns:
+            Returns the current best LCSS value and the translations that created this as a vector
+         */
         private static Vector<double> SimLoop(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing, int pointDistance, int spacing, Vector<double> similarity, List<Vector<double>> translations, int dimensions, int dimLeft, Vector<double> currentTrans = null){
             if(currentTrans == null){
                 currentTrans = Vector<double>.Build.Dense(dimensions, 0);
@@ -256,15 +359,19 @@ namespace SimilarityMeasures{
             int thisDim = dimensions - dimLeft;
 
             double prevTrans = -1;
-
+            //Testing each translation in this dimension
             for(int i = spacing - 1; i < translations[thisDim].Count; i += spacing){
+                //The newest translation
                 currentTrans[thisDim] = translations[thisDim][i];
+                //Skipping translations which have already been checked
                 if(currentTrans[thisDim] != prevTrans){
                     if(dimLeft > 1){
                         similarity = SimLoop(trajectory1, trajectory2, pointSpacing, pointDistance, spacing, similarity, translations, dimensions, dimLeft - 1, currentTrans);
                     }else{
+                        //Running the LCSS algorithm on each of the translations to be checked
                         int newValue = LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance, currentTrans);
 
+                        //Keeping the similarity and translations if they're better than the previous best
                         if(newValue > similarity[0]){
                             similarity[0] = newValue;
                             for(int d = 0; d < dimensions; d++){
@@ -278,6 +385,24 @@ namespace SimilarityMeasures{
 
             return similarity;
         }
+
+        /*Calculates the LCSS of two trajectories using a set translation
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+            translations: A vector containing translations in each dimension to be applied to trajectory2
+                in this calculation
+        Returns:
+            An integer representing the maximum LCSS value obtained using the variables provided. If a problem
+            occurs then -1 is returned
+         */
         public static int LCSSCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -309,6 +434,7 @@ namespace SimilarityMeasures{
             int similarity = 0;
 
             for(int row = 0; row < length1; row++){
+                //Calculating the relevant columns for each row
                 int minCol = 0;
                 int maxCol = length2 - 1;
                 if(row > pointSpacing){
@@ -321,18 +447,22 @@ namespace SimilarityMeasures{
                     for(int col = minCol; col <= maxCol; col++){
                         double newValue = 0;
                         double finalValue = 0;
-
+                        //Calculating the new LCSS value for the current two points
+                        //Checking the diagonal
                         if(row != 0 && col != 0){
                             finalValue = newValue = distMatrix[row - 1, col - 1];
                         }
+                        //Checking below
                         if(row != 0){
                             double below = distMatrix[row - 1, col];
                             finalValue = Math.Max(below, finalValue);
                         }
+                        //Checking the left
                         if(col != 0){
                             double before = distMatrix[row, col - 1];
                             finalValue = Math.Max(before, finalValue);
                         }
+                        //Checking if the current points can increment the LCSS
                         if(finalValue < newValue + 1){
                             bool checkPoint = DistanceCheck(trajectory1.Row(row), trajectory2.Row(col) + translations, pointDistance);
 
@@ -340,9 +470,9 @@ namespace SimilarityMeasures{
                                 finalValue = ++newValue;
                             }
                         }
-
+                        //Updating the distance matrix
                         distMatrix[row, col] = finalValue;
-
+                        //Updating the similarity if a new maximum has been found
                         if(finalValue > similarity){
                             similarity = (int)finalValue;
                         }
@@ -352,6 +482,22 @@ namespace SimilarityMeasures{
             return similarity;
         }
 
+        /*Calculates the ratio of the longest common subsequence to the shortest trajectory
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+            errorMargin: A number used to scale the accuracy and speed of the calculation
+        Returns:
+            A number representing the maximum LCSS ratio obtained using the variables provided. If a problem occurs
+            then -1 is returned
+         */
         public static double LCSSRatio(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -371,6 +517,23 @@ namespace SimilarityMeasures{
             return LCSS(trajectory1, trajectory2, pointSpacing, pointDistance, errorMargin)[0] / length;
         }
 
+        /*Calculates the LCSS ratio between two trajectories using a set translation
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+            translations: A vector containing the translations in each dimension to be applied to
+                trajectory2 in this calculation
+        Returns:
+            A number representing the maximum LCSS ratio obtained using the variables provided. If a 
+            problem occurs then -1 is returned.
+         */
         public static double LCSSRatioCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -394,6 +557,16 @@ namespace SimilarityMeasures{
             return (double)LCSSCalc(trajectory1, trajectory2, pointSpacing, pointDistance, translations) / length;
         }
 
+        /*Calculates the frechet distance when one trajectory contains only a single point
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+        Returns:
+            A number representing the Frechet distance is returned
+         */
         private static double SinglePointCalc(Matrix<double> trajectory1, Matrix<double> trajectory2){
             int dimensions = trajectory1.ColumnCount;
             int length1 = trajectory1.RowCount;
@@ -420,6 +593,21 @@ namespace SimilarityMeasures{
             }
         }
 
+        /*Calculates the subsets of translations to be tested using the LCSS methods
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            pointSpacing: An integer value of the maximum index difference between trajectory1 and
+                trajectory2 allowed in the calculation. A negative values ets the spacing to unlimited
+            pointDistance: A number representing the maximum distance in each dimension is allowed
+                for points to be considered equivalent
+        Retuns:
+            A vector of numbers containing the translations calculated. This vector is sorted
+            in ascending order
+         */
         private static Vector<double> TranslationSubset(Vector<double> trajectory1, Vector<double> trajectory2, int pointSpacing, int pointDistance){
             int length1 = trajectory1.Count;
             int length2 = trajectory2.Count;
@@ -451,6 +639,17 @@ namespace SimilarityMeasures{
             return Vector<double>.Build.Dense(translations.ToArray());
         }
 
+        /*Calculates a variation of trajectory2 by aligning its start and end points with those of trajectory1
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+        Returns:
+            An m x n matrix containing the new variation of trajectory2 is returned.
+            m is the number of points and n is the dimension of the points
+         */
         public static Matrix<double> StartEndTranslate(Matrix<double> trajectory1, Matrix<double> trajectory2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return null;
@@ -489,6 +688,21 @@ namespace SimilarityMeasures{
             return newTraj;
         }
 
+        /*Calculates the Frechet distance between two trajectories
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            testLeash: A numeric leash value, which if positive, checks whether the leash
+                can be used between the two trajectories. If this value is negative, then it is not
+                used and the standard calculation is performed.
+        Returns:
+            A number representing the Frechet distance is returned. If a test leash is given, it
+            is returned if the leash was successful, otherwise -1 is returned. If a problem occurs
+            then -1 is returned.
+         */
         public static double Frechet(Matrix<double> trajectory1, Matrix<double> trajectory2, double testLeash = -1.0){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
@@ -749,6 +963,21 @@ namespace SimilarityMeasures{
             }
         }
 
+        /*Checks whether a leash will work between two trajectories using the Frechet method
+        Args: 
+            trajectory1: An m x n matrix containing trajectory1. Here m is the number 
+                of points and n is the dimension of the points.
+            trajectory2: traj2: A k x n matrix containing trajectory2. Here k is the number 
+                of points and n is the dimension of the points.
+                The two trajectories do not need to have the same number of points
+            leash: A leash value to be checked
+            dist1: A vector containing the distance between each successive two points in trajectory1
+            dist2: A vector containing the distance between each successive two points in trajectory2
+            distSq12: A matrix containing the distance between each pair of two points where 1 point
+                lies in trajectory1 and the other in trajectory2
+        Returns:
+            A boolean value, true if the leash is successful, false otherwise.
+         */
         private static bool FrechetCheck(Matrix<double> trajectory1, Matrix<double> trajectory2, double leash, Vector<double> dist1, Vector<double> dist2, Matrix<double> distSq12){
             double leashSq = leash * leash;
             int dimensions = trajectory1.ColumnCount;
