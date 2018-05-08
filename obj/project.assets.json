@@ -691,23 +691,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Stewart\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "/Users/stewart/.nuget/packages/": {},
+    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\C# SimilarityMeasures Testing.csproj",
+      "projectUniqueName": "/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/C# SimilarityMeasures Testing.csproj",
       "projectName": "C# SimilarityMeasures Testing",
-      "projectPath": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\C# SimilarityMeasures Testing.csproj",
-      "packagesPath": "C:\\Users\\Stewart\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\obj\\",
+      "projectPath": "/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/C# SimilarityMeasures Testing.csproj",
+      "packagesPath": "/Users/stewart/.nuget/packages/",
+      "outputPath": "/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Stewart\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/stewart/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
