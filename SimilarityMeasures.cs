@@ -108,7 +108,7 @@ namespace SimilarityMeasures{
             double dist = 0;
 
             for(int i = 0; i < dimensions; i++){
-                dist += Math.Pow(point1[i] - point2[i], 2);
+                dist += Math.Pow(point1[i] - point2[i], 2.0);
             }
 
             return dist;
@@ -950,12 +950,9 @@ namespace SimilarityMeasures{
                 //Execute binary search
                 while(startSearch < endSearch){
                     int current = ((endSearch - startSearch) / 2) + startSearch;
-                    //Console.WriteLine("TESTING: " + uniqueLeash[current]);
                     if(FrechetCheck(trajectory1, trajectory2, uniqueLeash[current], dist1, dist2, distSq12)){
                         endSearch = current;
-                        //Console.WriteLine("RESULT: TRUE");
                     }else{
-                        //Console.WriteLine("RESULT: FALSE");
                         startSearch = current + 1;
                     }
                 }
@@ -1153,15 +1150,7 @@ namespace SimilarityMeasures{
                     }
                 }
             }
-            /*for(int i = 0; i < 2; i++){
-                for(int j = 0; j < length1; j++){
-                    for(int k = 0; k < length2 - 1; k++){
-                        Console.Write(newLeft[j,k,i] + " , ");
-                    }
-                    Console.WriteLine();
-                }
-                Console.WriteLine();
-            }*/
+
             //If the monotone freespace reaches the final point then the leash is successful
             if(newLeft[length1 - 1, length2 - 2, 1] == 1 || newBottom[length1 - 2, length2 - 1, 1] == 1){
                 return true;

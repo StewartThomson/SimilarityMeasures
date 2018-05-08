@@ -34,7 +34,7 @@ namespace SimilarityMeasures
             double[,] arr2 = {{0,0.68,6.14,12.73},{4,7.62,11.3,7.76}};
             path2 = Matrix.Build.DenseOfArray(arr2).Transpose();
             Console.WriteLine("\nTESTING Frechet:\n" + SimilarityMeasures.Frechet(path1, path2));
-            Console.WriteLine("\nTESTING Frechcet with leash length 5:\n" + SimilarityMeasures.Frechet(path1, path2, 5));
+            Console.WriteLine("\nTESTING Frechcet with leash length 8:\n" + SimilarityMeasures.Frechet(path1, path2, 8));
         }
     }
 }
