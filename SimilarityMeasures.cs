@@ -769,6 +769,7 @@ namespace SimilarityMeasures{
                 if(FrechetCheck(trajectory1, trajectory2, testLeash, dist1, dist2, distSq12)){
                     return testLeash;
                 }else{
+                    Console.WriteLine("Test leash failed");
                     return -1;
                 }
             }
@@ -863,7 +864,7 @@ namespace SimilarityMeasures{
                                 Vector<double> vect2new = trajectory1.Row(newPoint) - trajectory2.Row(point2);
                                 //Dot product finds how far from point2 the closest point on the line is
                                 double newPointDistance = unitV2.DotProduct(vect2new);
-                                if(newPointDistance > pointDistance){
+                                if(newPointDistance < pointDistance){
                                     double newPointDistSq = newPointDistance * newPointDistance;
                                     double newShortDistance = distSq12[newPoint, point2] - newPointDistSq;
                                     //The distance between the two closest points on the line
@@ -889,7 +890,7 @@ namespace SimilarityMeasures{
                     //Creating a unit vector in the direction of the next point from point2
                     Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
                     if(dist1[point1] != 0){
-                        unitV1 = (trajectory2.Row(point1 + 1) - trajectory2.Row(point1)) / dist2[point1];
+                        unitV1 = (trajectory1.Row(point1 + 1) - trajectory1.Row(point1)) / dist1[point1];
                     }
 
                     for(int point2 = 1; point2 < length2 - 2; point2++){
@@ -908,7 +909,7 @@ namespace SimilarityMeasures{
                                 Vector<double> vect1new = trajectory2.Row(newPoint) - trajectory1.Row(point1);
                                 //Dot product finds how far from point2 the closest point on the line is
                                 double newPointDistance = unitV1.DotProduct(vect1new);
-                                if(newPointDistance > pointDistance){
+                                if(newPointDistance < pointDistance){
                                     double newPointDistSq = newPointDistance * newPointDistance;
                                     double newShortDistance = distSq12[point1, newPoint] - newPointDistSq;
                                     //The distance between the two closest points on the line
@@ -948,10 +949,13 @@ namespace SimilarityMeasures{
             if(FrechetCheck(trajectory1, trajectory2, uniqueLeash[endSearch], dist1, dist2, distSq12)){
                 //Execute binary search
                 while(startSearch < endSearch){
-                    int current = (endSearch - startSearch / 2) * startSearch;
+                    int current = ((endSearch - startSearch) / 2) + startSearch;
+                    //Console.WriteLine("TESTING: " + uniqueLeash[current]);
                     if(FrechetCheck(trajectory1, trajectory2, uniqueLeash[current], dist1, dist2, distSq12)){
                         endSearch = current;
+                        //Console.WriteLine("RESULT: TRUE");
                     }else{
+                        //Console.WriteLine("RESULT: FALSE");
                         startSearch = current + 1;
                     }
                 }
@@ -989,7 +993,7 @@ namespace SimilarityMeasures{
             double[, ,] newLeft = new double[length1, length2 - 1, 2];
             double[, ,] newBottom = new double[length1 - 1, length2, 2];
 
-            if(leashSq < distSq12[0, 0] | leashSq < distSq12[length1 - 1, length2 - 2]){
+            if(leashSq < distSq12[0, 0] || leashSq < distSq12[length1 - 1, length2 - 1]){
                 return false;
             }
 
@@ -997,7 +1001,7 @@ namespace SimilarityMeasures{
             for(int point1 = 0; point1 < length1 - 1; point1++){
                 Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
                 if(dist1[point1] != 0){
-                    unitV1 = (trajectory1.Row(point1 + 1) - trajectory1.Row(point1) / dist1[point1]);
+                    unitV1 = ((trajectory1.Row(point1 + 1) - trajectory1.Row(point1)) / dist1[point1]);
                 }
 
                 for(int point2 = 0; point2 < length2; point2++){
@@ -1040,8 +1044,8 @@ namespace SimilarityMeasures{
             //Calculating the freespace of the second trajectory wrt the first
             for(int point2 = 0; point2 < length2 - 1; point2++){
                 Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
-                if(dist1[point2] != 0){
-                    unitV1 = (trajectory2.Row(point2 + 1) - trajectory2.Row(point2) / dist2[point2]);
+                if(dist2[point2] != 0){
+                    unitV1 = ((trajectory2.Row(point2 + 1) - trajectory2.Row(point2)) / dist2[point2]);
                 }
 
                 for(int point1 = 0; point1 < length1; point1++){
@@ -1141,7 +1145,7 @@ namespace SimilarityMeasures{
                                     newLeft[point1, point2, 0] = left[point1, point2, 0];
                                     newLeft[point1, point2, 1] = left[point1, point2, 1];
                                 }else if(newLeft[point1 - 1, point2, 0] <= left[point1, point2, 1]){
-                                    newLeft[point1, point2, 0] = left[point1 - 1, point2 - 1, 0];
+                                    newLeft[point1, point2, 0] = left[point1 - 1, point2, 0];
                                     newLeft[point1, point2, 1] = left[point1, point2, 1];
                                 }
                             }
@@ -1149,6 +1153,15 @@ namespace SimilarityMeasures{
                     }
                 }
             }
+            /*for(int i = 0; i < 2; i++){
+                for(int j = 0; j < length1; j++){
+                    for(int k = 0; k < length2 - 1; k++){
+                        Console.Write(newLeft[j,k,i] + " , ");
+                    }
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
+            }*/
             //If the monotone freespace reaches the final point then the leash is successful
             if(newLeft[length1 - 1, length2 - 2, 1] == 1 || newBottom[length1 - 2, length2 - 1, 1] == 1){
                 return true;

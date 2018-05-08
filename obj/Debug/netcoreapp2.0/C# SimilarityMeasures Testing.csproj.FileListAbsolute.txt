@@ -1,0 +1,22 @@
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.csprojResolveAssemblyReference.cache
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.csproj.CoreCompileInputs.cache
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.AssemblyInfoInputs.cache
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.AssemblyInfo.cs
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.dll
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/obj/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.pdb
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/bin/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.deps.json
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/bin/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.runtimeconfig.json
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/bin/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.runtimeconfig.dev.json
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/bin/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.dll
+/Users/stewart/Documents/SimilarityMeasures/SimilarityMeasures/bin/Debug/netcoreapp2.0/C# SimilarityMeasures Testing.pdb
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.deps.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.runtimeconfig.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.runtimeconfig.dev.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.dll
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.pdb
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.csproj.CoreCompileInputs.cache
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.AssemblyInfoInputs.cache
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.AssemblyInfo.cs
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.dll
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.pdb
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Debug\netcoreapp2.0\C# SimilarityMeasures Testing.csprojResolveAssemblyReference.cache
