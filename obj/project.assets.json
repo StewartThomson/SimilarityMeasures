@@ -697,9 +697,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\C# SimilarityMeasures Testing.csproj",
-      "projectName": "C# SimilarityMeasures Testing",
-      "projectPath": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\C# SimilarityMeasures Testing.csproj",
+      "projectUniqueName": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\SimilarityMeasures.csproj",
+      "projectName": "SimilarityMeasures",
+      "projectPath": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\SimilarityMeasures.csproj",
       "packagesPath": "C:\\Users\\Stewart\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Stewart\\Documents\\URA\\C# SimilarityMeasures Testing\\obj\\",
       "projectStyle": "PackageReference",

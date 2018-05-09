@@ -1,0 +1,10 @@
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Release\netcoreapp2.0\C# SimilarityMeasures Testing.deps.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Release\netcoreapp2.0\C# SimilarityMeasures Testing.runtimeconfig.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Release\netcoreapp2.0\C# SimilarityMeasures Testing.runtimeconfig.dev.json
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Release\netcoreapp2.0\C# SimilarityMeasures Testing.dll
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\bin\Release\netcoreapp2.0\C# SimilarityMeasures Testing.pdb
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Release\netcoreapp2.0\C# SimilarityMeasures Testing.csproj.CoreCompileInputs.cache
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Release\netcoreapp2.0\C# SimilarityMeasures Testing.AssemblyInfoInputs.cache
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Release\netcoreapp2.0\C# SimilarityMeasures Testing.AssemblyInfo.cs
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Release\netcoreapp2.0\C# SimilarityMeasures Testing.dll
+C:\Users\Stewart\Documents\URA\C# SimilarityMeasures Testing\obj\Release\netcoreapp2.0\C# SimilarityMeasures Testing.pdb

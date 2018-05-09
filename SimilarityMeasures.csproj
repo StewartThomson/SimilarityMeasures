@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>SimilarityMeasures</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <CSFile Include="SimilarityMeasures.cs"/>
+    <PackageReference Include="MathNet.Numerics" Version="4.4.0"/>
+  </ItemGroup>
+</Project>
