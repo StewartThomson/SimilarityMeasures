@@ -1,0 +1,6 @@
+#.gitignore
+#TestSimilarityMeasures.cs
+obj
+bin
+.vscode
+.vs

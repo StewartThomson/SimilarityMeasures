@@ -1,24 +1,38 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "29450398048080b2ac84716c1cd7d423e9e749e5"
+    "signature": "36894ec21b6dab637397d38935253a97410b5fbf"
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.0": {
       "C# SimilarityMeasures Testing/1.0.0": {
         "dependencies": {
-          "MathNet.Numerics": "4.4.0"
+          "CsvHelper": "7.1.0",
+          "MathNet.Numerics": "4.4.0",
+          "Microsoft.VisualBasic": "10.2.0"
         },
         "runtime": {
           "C# SimilarityMeasures Testing.dll": {}
+        }
+      },
+      "CsvHelper/7.1.0": {
+        "dependencies": {
+          "Microsoft.CSharp": "4.4.0",
+          "System.Reflection.TypeExtensions": "4.4.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/CsvHelper.dll": {}
         }
       },
       "MathNet.Numerics/4.4.0": {
         "runtime": {
           "lib/netstandard2.0/MathNet.Numerics.dll": {}
         }
-      }
+      },
+      "Microsoft.CSharp/4.4.0": {},
+      "Microsoft.VisualBasic/10.2.0": {},
+      "System.Reflection.TypeExtensions/4.4.0": {}
     }
   },
   "libraries": {
@@ -27,12 +41,40 @@
       "serviceable": false,
       "sha512": ""
     },
+    "CsvHelper/7.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-H9+MtVj4P6oXaV/ODdYYFA20LFeIfIY77xL+nfFaPIzZy5YdbezzLvUPWX6Lm3BU/pzqXZCgzxO8vLh6+wCQWA==",
+      "path": "csvhelper/7.1.0",
+      "hashPath": "csvhelper.7.1.0.nupkg.sha512"
+    },
     "MathNet.Numerics/4.4.0": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-nuzjdmH2HfGimpCynq0LDBSeHWU2pUcDuOT3Mxri0nSfEMHvqnYGas3qpVT9mHk1rMwguYiMFkilLiPBoQ3wHg==",
       "path": "mathnet.numerics/4.4.0",
       "hashPath": "mathnet.numerics.4.4.0.nupkg.sha512"
+    },
+    "Microsoft.CSharp/4.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vvVR/B08YVghQ4jHEloxqw2ZWzEGE1AOA5E0DioUM3ujbXz6FD3AfB/0Jl2ohJPd0nXYGwmPe1En6HTsSriq1A==",
+      "path": "microsoft.csharp/4.4.0",
+      "hashPath": "microsoft.csharp.4.4.0.nupkg.sha512"
+    },
+    "Microsoft.VisualBasic/10.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kCGAFbwHjE3nOpPtddLPaHZpsfjF93uS7CGiF7jjfZvDJzyHABaCxjp7+r5UvEYLxi906vMq57QC4E28zjS58Q==",
+      "path": "microsoft.visualbasic/10.2.0",
+      "hashPath": "microsoft.visualbasic.10.2.0.nupkg.sha512"
+    },
+    "System.Reflection.TypeExtensions/4.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dkmh/ySlwnXJp/1qYP9uyKkCK1CXR/REFzl7abHcArxBcV91mY2CgrrzSRA5Z/X4MevJWwXsklGRdR3A7K9zbg==",
+      "path": "system.reflection.typeextensions/4.4.0",
+      "hashPath": "system.reflection.typeextensions.4.4.0.nupkg.sha512"
     }
   }
 }
