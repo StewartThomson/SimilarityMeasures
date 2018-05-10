@@ -1,6 +1,7 @@
-#.gitignore
-#TestSimilarityMeasures.cs
+.gitignore
+TestSimilarityMeasures.cs
 obj
 bin
 .vscode
 .vs
+C# SimilarityMeasures Testing.csproj

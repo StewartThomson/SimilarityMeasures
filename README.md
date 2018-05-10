@@ -9,3 +9,6 @@ Use [NuGet Package Manager](https://www.nuget.org/)
 `$ nuget install SimilarityMeasures`
 
 This installs the [SimilarityMeasures library](https://www.nuget.org/packages/SimilarityMeasures) and the [MathNet.Numerics Library](https://numerics.mathdotnet.com/) needed for use.
+
+# Dependencies
+[MathNet.Numerics Library](https://numerics.mathdotnet.com/)
