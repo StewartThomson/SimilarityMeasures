@@ -151,20 +151,20 @@ namespace SimilarityMeasures{
 
             //Length1 rows, length2 columns, populated with -1
             Matrix<double> warpPaths = Matrix<double>.Build.Dense(length1, length2, -1);
-            double dist = DistanceSq(trajectory1.Row(1), trajectory2.Row(1));
+            double dist = DistanceSq(trajectory1.Row(0), trajectory2.Row(0));
             warpPaths[0,0] = Math.Sqrt(dist);
 
             //Initializing matrices
             if(length1 > 1 & pointSpacing > 0){
                 for(int i = 1; i < Math.Min(length1, pointSpacing + 1); i++){
-                    dist = DistanceSq(trajectory1.Row(i), trajectory2.Row(1));
+                    dist = DistanceSq(trajectory1.Row(i), trajectory2.Row(0));
                     warpPaths[i, 0] = Math.Sqrt(dist) + warpPaths[i - 1, 0];
                 }
             }
 
             if(length2 > 1 & pointSpacing > 0){
                 for(int i = 1; i < Math.Min(length2, pointSpacing + 1); i++){
-                    dist = DistanceSq(trajectory1.Row(1), trajectory2.Row(i));
+                    dist = DistanceSq(trajectory1.Row(0), trajectory2.Row(i));
                     warpPaths[0, i] = Math.Sqrt(dist) + warpPaths[0, i - 1];
                 }
             }
