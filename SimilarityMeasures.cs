@@ -1123,7 +1123,7 @@ namespace SimilarityMeasures{
                                     newBottom[point1, point2, 0] = bottom[point1, point2, 0];
                                     newBottom[point1, point2, 1] = bottom[point1, point2, 1];
                                 }else if(newBottom[point1, point2 - 1, 0] <= bottom[point1, point2, 1]){
-                                    newBottom[point1, point2, 0] = bottom[point1, point2 - 1, 0];
+                                    newBottom[point1, point2, 0] = newBottom[point1, point2 - 1, 0];
                                     newBottom[point1, point2, 1] = bottom[point1, point2, 1];
                                 }
                             }
@@ -1142,7 +1142,7 @@ namespace SimilarityMeasures{
                                     newLeft[point1, point2, 0] = left[point1, point2, 0];
                                     newLeft[point1, point2, 1] = left[point1, point2, 1];
                                 }else if(newLeft[point1 - 1, point2, 0] <= left[point1, point2, 1]){
-                                    newLeft[point1, point2, 0] = left[point1 - 1, point2, 0];
+                                    newLeft[point1, point2, 0] = newLeft[point1 - 1, point2, 0];
                                     newLeft[point1, point2, 1] = left[point1, point2, 1];
                                 }
                             }

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>SimilarityMeasures</AssemblyName>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp2.0;netstandard2.0;net472</TargetFrameworks>
     <RuntimeIdentifiers>osx-x64;linux-x64;win-x86;win-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
