@@ -994,6 +994,24 @@ namespace SimilarityMeasures{
                 return false;
             }
 
+            for(int i = 0; i < length1; i++){
+                for(int j = 0; j < length2 - 1; j++){
+                    left[i, j, 0] = -1;
+                    newLeft[i, j, 0] = -1;
+                    left[i, j, 1] = -1;
+                    newLeft[i, j, 1] = -1;
+                }
+            }
+
+            for(int i = 0; i < length1 - 1; i++){
+                for(int j = 0; j < length2; j++){
+                    bottom[i, j, 0] = -1;
+                    newBottom[i, j, 0] = -1;
+                    bottom[i, j, 1] = -1;
+                    newBottom[i, j, 1] = -1;
+                }
+            }
+
             //Calculating the freespace of the first trajectory wrt the second
             for(int point1 = 0; point1 < length1 - 1; point1++){
                 Vector<double> unitV1 = Vector<double>.Build.Dense(dimensions, 0);
