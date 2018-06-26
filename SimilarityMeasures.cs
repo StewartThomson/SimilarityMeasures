@@ -282,7 +282,7 @@ namespace SimilarityMeasures{
             The first value of the vector is the LCSS values. If a problem occurs then a vector containing
             -1 is returned
          */
-        public static Vector<double> LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
+        public static Vector<double> LCSS(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, double pointDistance = 20, double errorMargin = 2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return Vector<double>.Build.Dense(1, -1);
             }
@@ -351,7 +351,7 @@ namespace SimilarityMeasures{
         Returns:
             Returns the current best LCSS value and the translations that created this as a vector
          */
-        private static Vector<double> SimLoop(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing, int pointDistance, int spacing, Vector<double> similarity, List<Vector<double>> translations, int dimensions, int dimLeft, Vector<double> currentTrans = null){
+        private static Vector<double> SimLoop(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing, double pointDistance, int spacing, Vector<double> similarity, List<Vector<double>> translations, int dimensions, int dimLeft, Vector<double> currentTrans = null){
             if(currentTrans == null){
                 currentTrans = Vector<double>.Build.Dense(dimensions, 0);
             }
@@ -403,7 +403,7 @@ namespace SimilarityMeasures{
             An integer representing the maximum LCSS value obtained using the variables provided. If a problem
             occurs then -1 is returned
          */
-        public static int LCSSCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
+        public static int LCSSCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, double pointDistance = 20, Vector<double> translations = null){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
             }
@@ -498,7 +498,7 @@ namespace SimilarityMeasures{
             A number representing the maximum LCSS ratio obtained using the variables provided. If a problem occurs
             then -1 is returned
          */
-        public static double LCSSRatio(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, double errorMargin = 2){
+        public static double LCSSRatio(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, double pointDistance = 20, double errorMargin = 2){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
             }
@@ -534,7 +534,7 @@ namespace SimilarityMeasures{
             A number representing the maximum LCSS ratio obtained using the variables provided. If a 
             problem occurs then -1 is returned.
          */
-        public static double LCSSRatioCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, int pointDistance = 20, Vector<double> translations = null){
+        public static double LCSSRatioCalc(Matrix<double> trajectory1, Matrix<double> trajectory2, int pointSpacing = -1, double pointDistance = 20, Vector<double> translations = null){
             if(!TrajCheck(trajectory1, trajectory2)){
                 return -1;
             }
@@ -608,7 +608,7 @@ namespace SimilarityMeasures{
             A vector of numbers containing the translations calculated. This vector is sorted
             in ascending order
          */
-        private static Vector<double> TranslationSubset(Vector<double> trajectory1, Vector<double> trajectory2, int pointSpacing, int pointDistance){
+        private static Vector<double> TranslationSubset(Vector<double> trajectory1, Vector<double> trajectory2, int pointSpacing, double pointDistance){
             int length1 = trajectory1.Count;
             int length2 = trajectory2.Count;
 
